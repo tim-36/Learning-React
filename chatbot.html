@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+  </head>
+  <body>
+    <div class="js-container"></div>
+
+    <script src="https://unpkg.com/supersimpledev/react.js"></script>
+    <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
+
+    <script src="https://unpkg.com/supersimpledev/babel.js"></script>
+    <script type="text/babel">
+      
+      function ChatInput() {
+        return (
+          //fraqment allows us to group elements
+          <>          
+            <input
+              placeholder="Send a message to Chatbot..." 
+              size="30" 
+            />
+            <button>Send</button>
+          </>
+        );
+      }
+
+      function ChatMessage({message,sender}) {
+        //props make our componets reuseable 
+        // also a decontsrut of const message = props.message;
+        //allows us to use vaiables driectly from 
+        //const{message,sender} = props;  ->     
+
+        // if(sender === 'robot') {
+        //   return(
+        //     <div>
+        //       {message}
+        //     </div>
+        //   );
+        // }
+
+        return (
+          <div>
+            {sender==="robot" &&  (
+              <img src="images/robot.png" width="50"/>
+            )}
+            {message}
+            {sender==="user" && (
+              <img src="images/user.png" width="50"/>
+            )}
+          </div>
+        );
+      }
+
+      function ChatMessages() {
+        //
+        const array = React.useState([{
+          message: "hello chabot",
+          sender: "user",
+          id:"id1"
+        }, 
+        {
+          message: "ello, how can I help you",
+          sender: "robot",
+          id:"id2"
+        }]);
+
+        //shows the current value of chatMessges:
+        const chatMessages = array[0];
+
+        //updater function - we can upate the data in this way 
+        //React knows that data has changed thus change the HTML
+        //instead of directly where HTML wont change: like in chatMessages.push()
+        const setChatMessages = array[1];
+
+        //generating HTML with chatMessages...
+        //"..." spread operater that copies elements
+        function sendMessage() {
+          setChatMessages([
+            ...chatMessages,
+            {
+              message: "test",
+              sender: "user",
+              id: crypto.randomUUID()
+            }
+          ]);
+        }
+
+    
+        return(
+          <> 
+            <Button text = "Send Message" onClick={sendMessage} />
+            
+            {chatMessages.map((chatMessage) => {
+                return(
+                  <ChatMessage
+                    message={chatMessage.message}
+                    sender={chatMessage.sender}
+                    key={chatMessage.id}
+                  />
+                );
+              })}
+          </>
+        )
+        
+      }
+
+      function Button({text, onClick}) {
+        return(
+          <button onClick={onClick}>
+            {text}
+          </button>
+        );
+      }
+
+      function App() {     
+        return(
+          <>
+              {/*componet syntex _ creating our own HTMl elements*/}
+
+              <ChatInput />
+              <ChatMessages />
+          </>
+        );
+      }
+
+      const container = document.querySelector('.js-container');    //put a html element into js container
+      ReactDOM.createRoot(container).render(<App />);
+    </script>
+
+  </body>
+</html>
