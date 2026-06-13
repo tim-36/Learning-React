@@ -8,21 +8,79 @@
   <body>
     <div class="js-container"></div>
 
+    <--!Load files--
+
     <script src="https://unpkg.com/supersimpledev/react.js"></script>
     <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
 
+    <script src="https://unpkg.com/supersimpledev/chatbot.js"></script>
+
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
     <script type="text/babel">
+
+      function Button({text, onClick}) {
+        return(
+          <button onClick={onClick}>
+            {text}
+          </button>
+        );
+      }
       
-      function ChatInput() {
+      
+      function ChatInput({chatMessages, setChatMessages}) {
+
+        //gain any text from ChaptInput(which is a textbox)
+        const [inputText,setInputText] = React.useState("");
+
+        function saveInputText(event){
+          setInputText(event.target.value);
+        }
+
+        //generating HTML with chatMessages...
+        //"..." spread operater that copies elements
+        //now user data can be updated with whats in ChatInput(text)
+        //using messgae = inputText thus HTML is updated
+        function sendMessage() {
+
+          const newChatMessgaes = [
+            ...chatMessages,
+            {
+              message: inputText,
+              sender: "user",
+              id: crypto.randomUUID()
+            }
+          ]
+          setChatMessages(newChatMessgaes);
+
+          // chatbot response
+          const response = Chatbot.getResponse(inputText);
+          setChatMessages([
+            ...newChatMessgaes,
+            {
+              message: response,
+              sender: "robot",
+              id: crypto.randomUUID()
+            }
+          ]);
+
+          //removing text after entering
+          setInputText("");
+        }
+
+
         return (
           //fraqment allows us to group elements
           <>          
             <input
               placeholder="Send a message to Chatbot..." 
-              size="30" 
+              size="30"
+              //runs a func when theres a change inside
+              onChange={saveInputText}
+              //Controled input - allows for changes in input element/textbox
+              //if inputText is empty then HTML will be empty as well
+              value={inputText}
             />
-            <button>Send</button>
+            <Button text="Send" onClick={sendMessage} />
           </>
         );
       }
@@ -54,45 +112,10 @@
         );
       }
 
-      function ChatMessages() {
-        //
-        const array = React.useState([{
-          message: "hello chabot",
-          sender: "user",
-          id:"id1"
-        }, 
-        {
-          message: "ello, how can I help you",
-          sender: "robot",
-          id:"id2"
-        }]);
-
-        //shows the current value of chatMessges:
-        const chatMessages = array[0];
-
-        //updater function - we can upate the data in this way 
-        //React knows that data has changed thus change the HTML
-        //instead of directly where HTML wont change: like in chatMessages.push()
-        const setChatMessages = array[1];
-
-        //generating HTML with chatMessages...
-        //"..." spread operater that copies elements
-        function sendMessage() {
-          setChatMessages([
-            ...chatMessages,
-            {
-              message: "test",
-              sender: "user",
-              id: crypto.randomUUID()
-            }
-          ]);
-        }
-
-    
+      function ChatMessages({chatMessages}) {       
+        
         return(
           <> 
-            <Button text = "Send Message" onClick={sendMessage} />
-            
             {chatMessages.map((chatMessage) => {
                 return(
                   <ChatMessage
@@ -105,23 +128,46 @@
           </>
         )
         
-      }
+      }      
 
-      function Button({text, onClick}) {
-        return(
-          <button onClick={onClick}>
-            {text}
-          </button>
-        );
-      }
+      function App() { 
+        
+        //converting data into state thus allowin for update of HTML
+        const [chatMessages, setChatMessages] = React.useState([{
+          message: "hello chabot",
+          sender: "user",
+          id:"id1"
+        }, 
+        {
+          message: "ello, how can I help you",
+          sender: "robot",
+          id:"id2"
+        }]);
 
-      function App() {     
+        //shows the current value of chatMessges:
+        //following is chortcut of const chatMessages = array[0];
+        // and const setChatMessages = array[1];
+        //const [chatMessages, setChatMessages] = array;
+
+        //updater function (setChatMessages) - we can upate the data in this way 
+        //React knows that data has changed thus change the HTML
+        //instead of directly where HTML wont change: like in chatMessages.push()
+        
+        //chatMessages was lifted the state up:
+        // sharing the state between multiple compents 
         return(
           <>
               {/*componet syntex _ creating our own HTMl elements*/}
 
-              <ChatInput />
-              <ChatMessages />
+              {/*using props to share the state amoungst componts*/}
+              {/*shared chatMessages bewteen ChatInput and ChatMessages*/}
+              <ChatInput 
+                chatMessages={chatMessages}
+                setChatMessages={setChatMessages}
+              />
+              <ChatMessages 
+                chatMessages={chatMessages}
+              />
           </>
         );
       }
